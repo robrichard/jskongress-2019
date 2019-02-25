@@ -1,0 +1,16 @@
+{
+  "name": "jskongress-2019",
+  "version": "1.0.0",
+  "description": "Slides for Rob Richard's talk at JSKongress 2019",
+  "repository": "git@github.com:robrichard/jskongress-2019.git",
+  "author": "Rob Richard <rob@1stdibs.com>",
+  "private": true,
+  "scripts": {
+    "start": "mdx-deck deck.mdx",
+    "build": "mdx-deck build deck.mdx",
+    "pdf": "mdx-deck pdf deck.mdx"
+  },
+  "devDependencies": {
+    "mdx-deck": "^1.10.0"
+  }
+}
