@@ -1,11 +1,127 @@
-# This is the title of my deck
+export { book as theme } from 'mdx-deck/themes';
+import Split from './SplitLayout';
+import { Image } from 'mdx-deck';
+
+# Streaming HTTP and GraphQL
+
+## Rob Richard
+
+## Director, Front-End Engineering @ 1stdibs
+
 ---
-# About Me
+
+## What are the best ways to load data into an application?
+
+-   Minimize transfer size
+-   Minimize round trips
+
 ---
-```jsx
-<CodeSnippet />
+
+export default Split;
+
+## Example App
+
+![](app.png)
+
+-   A conference app with talks, speakers, and comments
+
+---
+
+## Rest
+
+-   Typically one resource per request
+-   Could require multiple round trips or waterfalls for each resource
+
+---
+
+export default Split;
+
+## Example App with Rest
+
+![](app.png)
+
 ```
+GET /api/schedule/<conference id>
+GET /api/speaker/<speaker id>
+GET /api/talk/<talk id>/comments
+```
+
 ---
-test
+
+## GraphQL
+
+-   Get many resources in a single request
+
 ---
-# The end
+
+<blockquote>
+    "GraphQL queries access not just the properties of one resource but also smoothly follow
+    references between them. While typical REST APIs require loading from multiple URLs, GraphQL
+    APIs get all the data your app needs in a single request. Apps using GraphQL can be quick even
+    on slow mobile network connections."
+</blockquote>
+
+## <center><cite>- graphql.org</cite></center>
+
+## Why are fewer round trips faster?
+
+-   Even if it’s same data speed
+-   Even if you’re wrapping a REST api?
+-   GraphQL server makes fast reliable network requests, same datacenter
+-   Trimmed down data is sent over slow, spotty internet
+
+---
+
+## Fields as a function
+
+-   In most graphql server implementations every field is a function
+
+---
+
+## Downside to batching all requests up
+
+-   The response can only be as fast as the slowest data in your query
+
+---
+
+# Solutions:
+
+-   Multiple graphql queries
+-   Could introduce multiple round trips or waterfalls
+-   Needs to wait for first request to finish before second can begin
+-   Similar management you had to do with REST
+
+---
+
+# `@defer` directive
+
+-   Experimental new GraphQL feature
+-   Gives clients a way to add boundaries to graphql requests
+-   server can send results that are ready while the others are still parsing
+-   client can begin rendering as data is received
+
+---
+
+<Image src="defer.gif" size="contain" />
+
+---
+
+# Implementation option: WebSockets
+
+-   require stateful backend to manage connections
+-   this is suitable for long lived subscriptions, but not necessary for this type of response
+
+---
+
+# Implementation option: Server sent events (SSE)
+
+-   could work not supported in Edge/IE
+
+---
+
+# Implementation option: HTTP Streaming
+
+-   multi part response like file uploads and emails
+-   HTTP connection stays open until all data is received.
+-   Requires a client that can stream data
+    -   loop over data until enough bytes are read
