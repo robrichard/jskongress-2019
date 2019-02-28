@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Streaming HTTP and GraphQL</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style type="text/css">
+      /*! global/fonts */
+      @font-face {
+        font-family: Miller Display Light;
+        src: url('https://a.1stdibscdn.com/dist/fonts/MillerDisplay/MillerDisplay-Light.woff')
+          format('woff');
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: Miller Display Light Italic;
+        src: url('https://a.1stdibscdn.com/dist/fonts/MillerDisplay/MillerDisplay-LightItalic.woff')
+          format('woff');
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: Proxima Nova Light;
+        src: url('https://a.1stdibscdn.com/dist/fonts/ProximaNova/ProximaNova-Light.woff')
+          format('woff');
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: Proxima Nova Light Italic;
+        src: url('https://a.1stdibscdn.com/dist/fonts/ProximaNova/ProximaNova-LightItalic.woff')
+          format('woff');
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: Proxima Nova SemiBold;
+        src: url('https://a.1stdibscdn.com/dist/fonts/ProximaNova/ProximaNova-Sbold.woff')
+          format('woff');
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      body {
+        font-family: 'Proxima Nova Light';
+        color: #222;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: 'Miller Display Light';
+        font-weight: 400;
+      }
+
+      .remark-slide-content h1,
+      h1 .remark-inline-code {
+        font-size: 38px !important;
+      }
+
+      .remark-slide-content h2 {
+        font-size: 32px !important;
+      }
+
+      .remark-slide-content h3 {
+        font-size: 26px;
+      }
+
+      .remark-slide-content li {
+        font-size: 32px;
+        line-height: 1.6;
+      }
+
+      .remark-code,
+      .remark-inline-code {
+        font-family: courier;
+        font-size: 16px;
+      }
+
+      .flex {
+        display: flex;
+      }
+
+      .big {
+        margin: 0;
+      }
+
+      .bigCode .remark-code {
+        font-size: 18px !important;
+      }
+
+      .column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .addition {
+        box-sizing: border-box;
+        height: 100%;
+      }
+      .codeBorder {
+        border: 1px solid #ddd;
+        padding: 5px;
+      }
+
+      .codeBorder h3 {
+        margin: 0 !important;
+      }
+
+      .codeBorder pre {
+        margin: 0;
+      }
+
+      .smallCode .remark-code {
+        font-size: 12px !important;
+      }
+
+      .column-arrow {
+        font-size: 60px !important;
+        flex: 1;
+        text-align: center;
+        vertical-align: middle;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+      }
+
+      .plus {
+        font-size: 60px !important;
+        font-weight: bold;
+        flex: 1;
+        text-align: center;
+        vertical-align: middle;
+        justify-content: center;
+        display: flex;
+        padding: 0px;
+        margin: 12px;
+      }
+      .equals {
+        font-size: 60px !important;
+        font-weight: bold;
+        flex: 1;
+        text-align: center;
+      }
+      .columnPlus {
+        margin-top: 67px;
+      }
+      .marginTop {
+        margin-top: 20px;
+      }
+      .smallJson pre {
+        margin: 0;
+      }
+      .codeLine p {
+        margin: 0;
+      }
+      .highlight {
+        background-color: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Streaming HTTP and GraphQL
+
+## Rob Richard
+## Director, Front-End Engineering @ 1stdibs
+
+
+???
+
+* Hi! My name is Rob and I'm a Front-End Engineering @ 1stdibs.
+
+---
+
+<image style="width:100%" src="./1stdibs.png"/>
+
+???
+* 1stdibs is an online marketplace for rare and desireable goods. We sell Vintage and Antique Furniture, Jewelry, Fashion, and Art.
+* Our front-end team is all-in on JavaScript. 
+* Our stack is Node, GraphQL, React, & Relay.
+
+---
+## What are the best ways to load data into an application?
+
+-   Minimize transfer size
+-   Minimize round trips
+
+---
+
+# Example App
+.flex[
+.column[
+<img src="app.png" style="width:80%" />
+]
+
+.column[
+-   A conference app with talks, speakers, and comments
+]
+
+]
+
+---
+
+# Rest
+
+-   Typically one resource per request
+-   Could require multiple round trips or waterfalls for each resource
+
+---
+
+# Example App with Rest
+
+.flex[
+
+.column[
+<img src="app.png" style="width:80%" />
+]
+.column.codeLine[
+`GET` `/api/talks/`
+
+.smallJson[
+```json
+[{
+    id: 1,
+    time: "10:30-11:00",
+    speakerId: 5,
+    title: "Opening Keynote"
+}, ...]
+```
+]
+
+<br>
+
+`GET` <code>/api/speaker/<span class="highlight">5</span></code>
+
+.smallJson[
+```json
+{
+    id: 5,
+    name: "Sean Larkin"
+}
+```
+]
+
+<br>
+
+`GET` <code>/api/talk/<span class="highlight">1</span>/comments</code>
+
+.smallJson[
+```json
+[{
+    id: 9,
+    body: "Loved this!"
+}, ...]
+```
+]
+]
+]
+---
+
+
+# Rest waterfall
+
+<img src="rest-waterfall.png" />
+
+---
+# GraphQL
+
+-   Get many resources in a single request
+
+<br />
+
+<blockquote>
+    "GraphQL queries access not just the properties of one resource but also smoothly follow
+    references between them. While typical REST APIs require loading from multiple URLs, GraphQL
+    APIs get all the data your app needs in a single request. Apps using GraphQL can be quick even
+    on slow mobile network connections."
+</blockquote>
+
+## <center><cite>- graphql.org</cite></center>
+
+---
+# Example App with GraphQL
+
+.flex[
+
+.column[
+<img src="app.png" style="width:80%" />
+]
+.column.codeLine[
+`POST` `/api/graphql/`
+
+<br />
+
+REQUEST
+
+.smallJson[
+```graphql
+query {
+  talks {
+    title
+    time
+    speaker {
+      name
+    }
+    comments {
+      body
+    }
+  }
+}
+```
+]
+]
+.column.codeLine[
+
+.smallJson[
+<br />
+<br />
+
+RESPONSE
+<br />
+
+```json
+{
+  "talks": [{
+      "title": "Opening Keynote",
+      "time": "10:30-11:00",
+      "speaker": {
+        "name": "Sean Larkin"
+      },
+      "comments": [{
+        "body": "Loved this!"
+      }]
+    }, ...]
+}
+```
+]
+
+]
+]
+
+---
+
+## Why are fewer round trips faster?
+
+-   Even if it’s same data speed
+-   Even if you’re wrapping a REST api?
+-   GraphQL server makes fast reliable network requests, same datacenter
+-   Trimmed down data is sent over slow, spotty internet
+
+---
+
+# Fields as a function
+
+-   In most graphql server implementations every field is a function
+
+---
+
+# Downside to batching all requests up
+
+-   The response can only be as fast as the slowest data in your query
+
+---
+
+# Solutions:
+
+-   Multiple graphql queries
+-   Could introduce multiple round trips or waterfalls
+-   Needs to wait for first request to finish before second can begin
+-   Similar management you had to do with REST
+
+---
+
+# `@defer` directive
+
+-   Experimental new GraphQL feature
+-   Gives clients a way to add boundaries to graphql requests
+-   server can send results that are ready while the others are still parsing
+-   client can begin rendering as data is received
+
+---
+
+<Image src="defer.gif" size="contain" />
+
+---
+
+# Implementation option: WebSockets
+
+-   require stateful backend to manage connections
+-   this is suitable for long lived subscriptions, but not necessary for this type of response
+
+---
+
+# Implementation option: Server sent events (SSE)
+
+-   could work not supported in Edge/IE
+
+---
+
+# Implementation option: HTTP Streaming
+
+-   multi part response like file uploads and emails
+-   HTTP connection stays open until all data is received.
+-   Requires a client that can stream data
+    -   loop over data until enough bytes are read
+
+
+
+---
+# That's all!
+* https://www.1stdibs.com
+* twitter: @rob_richard
+* github: @robrichard
+
+???
+* That's all!
+* Thank you so much!
+
+
+    </textarea>
+    <script
+      src="https://remarkjs.com/downloads/remark-latest.min.js"
+      type="text/javascript"
+    ></script>
+    <script type="text/javascript">
+      var slideshow = remark.create({
+        // highlightLanguage: 'javascript',
+        highlightStyle: 'xcode',
+      });
+    </script>
+  </body>
+</html>
