@@ -84,6 +84,12 @@
         display: flex;
       }
 
+      .flex-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
       .big {
         margin: 0;
       }
@@ -358,6 +364,14 @@ RESPONSE
 
 ---
 
+# Why are fewer round trips faster?
+
+.flex[
+<img style="width: 100%" src="graphql-waterfall.png" />
+]
+
+---
+
 # Fields as a function
 
 -   In most graphql server implementations every field is a function
@@ -366,17 +380,20 @@ RESPONSE
 
 # Downside to batching all requests up
 
--   The response can only be as fast as the slowest data in your query
+-   Your page loads as fast as its slowest piece of data.
 
 ---
 
-# Solutions:
+# Solution: Multiple graphql queries
 
--   Multiple graphql queries
 -   Could introduce multiple round trips or waterfalls
 -   Needs to wait for first request to finish before second can begin
 -   Similar management you had to do with REST
 
+---
+# Multiple graphql queries
+
+.flex-center[<img style="width: 80%; height:100%" src="graphql-waterfall-multiple.png" />]
 ---
 
 # `@defer` directive
@@ -385,6 +402,78 @@ RESPONSE
 -   Gives clients a way to add boundaries to graphql requests
 -   server can send results that are ready while the others are still parsing
 -   client can begin rendering as data is received
+
+---
+# `@defer` directive
+
+.flex[
+
+.column.codeLine[
+`POST` `/api/graphql/`
+
+<br />
+
+REQUEST
+
+.smallJson[
+```graphql
+query {
+  talks {
+    title
+    time
+    speaker {
+      name
+    }
+    comments @defer {
+      body
+    }
+  }
+}
+```
+]
+]
+.column.codeLine[
+
+.smallJson[
+<br />
+<br />
+
+Initial Response
+<br />
+
+```json
+{
+  "data": {
+    "talks": [{
+      "title": "Opening Keynote",
+      "time": "10:30-11:00",
+      "speaker": {
+        "name": "Sean Larkin"
+      },
+      "comments": null
+    }, ...]
+  }
+}
+```
+]
+
+Deferred Response
+<br />
+
+```json
+{
+  "path": ["talks", 0, "comments"],
+  "data":  [{
+    "body": "Loved this!"
+  }]
+}
+```
+]
+
+
+]
+]
+
 
 ---
 
