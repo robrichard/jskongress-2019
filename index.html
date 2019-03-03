@@ -461,6 +461,7 @@ Deferred Response
 <br />
 
 ```json
+// Patch for "comments", sent for each talk
 {
   "path": ["talks", 0, "comments"],
   "data":  [{
@@ -481,27 +482,50 @@ Deferred Response
 
 ---
 
-# Implementation option: WebSockets
+# Implementation: HTTP Streaming
 
--   require stateful backend to manage connections
--   this is suitable for long lived subscriptions, but not necessary for this type of response
-
----
-
-# Implementation option: Server sent events (SSE)
-
--   could work not supported in Edge/IE
-
----
-
-# Implementation option: HTTP Streaming
-
--   multi part response like file uploads and emails
+-   Multipart response like file uploads and emails
 -   HTTP connection stays open until all data is received.
 -   Requires a client that can stream data
     -   loop over data until enough bytes are read
 
+---
+# HTTP Streaming
 
+.flex[
+
+.column[
+```
+---
+Content-Type: application/json
+Content-Length: 790
+
+{
+  "data": {
+    "talks": [{
+      "title": "Opening Keynote",
+      "time": "10:30-11:00",
+      "speaker": {
+        "name": "Sean Larkin"
+      },
+      "comments": null
+    }, ...]
+  }
+}
+
+---
+Content-Type: application/json
+Content-Length: 340
+
+{
+  "path": ["talks", 0, "comments"],
+  "data":  [{
+    "body": "Loved this!"
+  }]
+}
+```
+]
+]
 
 ---
 # That's all!
