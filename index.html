@@ -378,6 +378,14 @@ RESPONSE
 
 ---
 
+# Other GraphQL Features
+
+-   Type system
+-   Subscriptions
+
+---
+
+
 # Downside to batching all requests up
 
 -   Your page loads as fast as its slowest piece of data.
@@ -528,6 +536,142 @@ Content-Length: 340
 ]
 
 ---
+# Standard GraphQL Network Layer
+
+Returns a promise with data
+
+.bigCode[
+
+```javascript
+  function fetchGraphQL(query) {
+    return fetch('/graphql', {
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({query})
+    }).then(response => {
+      return response.json();
+    })
+  }
+```
+
+]
+
+---
+# Streaming GraphQL Network Layer
+
+Use Readable Streams api to read bytes as they are recieved.
+
+Returns a stream of response data. 
+
+Similar to GraphQL Subscriptions
+
+.bigCode[
+
+```javascript
+function fetchGraphQL({query, onNext, onComplete}) {
+  return fetch('/graphql', {
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({query})
+  }).then(response => {
+    const textDecoder = new TextDecoder();
+    const patchResolver = new PatchResolver(r => onNext(r));
+*   reader.read().then(function sendNext({ value, done }) {
+      if (!done) {
+        const plaintext = textDecoder.decode(value);
+        patchResolver.handleChunk(plaintext);
+*       reader.read().then(sendNext);
+      } else {
+        onComplete();
+      }
+    });
+  })
+}
+```
+
+]
+
+---
+# Parsing MultiPart HTTP Responses
+
+.bigCode[
+
+Custom PatchResolver class. 
+
+Store previous data and apply and return patches
+
+```javascript
+function fetchGraphQL({query, onNext, onComplete}) {
+  return fetch('/graphql', {
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({query})
+  }).then(response => {
+    const textDecoder = new TextDecoder();
+*   const patchResolver = new PatchResolver(r => onNext(r));
+    reader.read().then(function sendNext({ value, done }) {
+      if (!done) {
+        const plaintext = textDecoder.decode(value);
+*       patchResolver.handleChunk(plaintext);
+        reader.read().then(sendNext);
+      } else {
+        onComplete();
+      }
+    });
+  })
+}
+```
+
+]
+
+---
+# Open source implementation
+
+* https://github.com/relay-tools/fetch-multipart-graphql/
+* Contains code to fetch and parse MultiPart HTML Response
+
+---
+# Browser Support?
+
+* ReadableStream API
+  * ✅ Chrome
+  * ✅ Firefox >= v65 (very recent)
+  * ✅ Safari >= v10
+  * ✅ Edge
+  * ❌ Internet Explorer
+
+---
+# Use XMLHttpRequest as a fallback
+.bigCode[
+
+Works in all browsers
+
+```javascript
+function fetchGraphQLXHR({query, onNext, onComplete}) {
+  const xhr = new XMLHttpRequest();
+  let index = 0;
+
+  const patchResolver = new PatchResolver(r => onNext(r));
+
+  function onReadyStateChange() {
+    if (this.readyState === this.DONE) {
+      onComplete();
+    } else {
+      const chunk = xhr.response.substr(index);
+      patchResolver.handleChunk(chunk);
+      index = xhr.responseText.length;
+    }
+  }
+
+  xhr.addEventListener('readystatechange', onReadyStateChange);
+  xhr.send(JSON.stringify({query}));
+}
+```
+]
+---
 # That's all!
 * https://www.1stdibs.com
 * twitter: @rob_richard
@@ -547,6 +691,7 @@ Content-Length: 340
       var slideshow = remark.create({
         // highlightLanguage: 'javascript',
         highlightStyle: 'xcode',
+        highlightLines: true,
         scroll: false,
         ratio: '4:3',
       });
