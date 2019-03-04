@@ -279,6 +279,14 @@ class: center, middle
 
 ---
 # GraphQL
+* A data query language
+* Developed by Facebook
+* Used internally since 2012
+* Open source version published in July 2015
+* Specification: https://facebook.github.io/graphql
+
+---
+# GraphQL
 
 -   Get many resources in a single request
 
@@ -372,16 +380,125 @@ RESPONSE
 
 ---
 
-# Fields as a function
+# Every field is a function
 
--   In most graphql server implementations every field is a function
+.flex[
+
+.column[
+```graphql
+query ($first: Int!) {
+  talks {
+    speaker {
+      picture(size: 300) {
+        width
+        height
+        url
+      }
+    }
+  }
+}
+```
+]
+
+.column[
+```json
+{
+  "data": {
+    "talks": [
+      {
+        "speaker": {
+          "picture": {
+            "width": 300,
+            "height": 300,
+            "url": "http://..."
+          }
+        }
+      },
+      ...
+    ]
+  }
+}
+```
+]
+
+]
+
+
+---
+# Variables
+
+* Parameterize GraphQL Queries
+
+```graphql
+query ($size: Int!) {
+  talks {
+    speaker {
+      picture(size: $size) {
+        width
+        height
+        url
+      }
+    }
+  }
+}
+
+```
+
+---
+# Fragments
+
+* Reusable bits of GraphQL
+
+```graphql
+query {
+  talks {
+    title
+    time
+    speaker {
+      name
+    }
+    ...Comments
+  }
+}
+
+fragment Comments on Talk {
+  comments {
+    body
+  }
+}
+```
+
+---
+# Directives
+
+* Uses the @ character
+* Can take arguments
+* @include and @skip built into GraphQL Specification
+* Used by other frameworks for experimental features
+
+```graphql
+query($showSpeaker: Boolean!) {
+  talks {
+    title 
+    time
+    speaker @include(if: $showSpeaker) {
+      name
+    }
+  }
+}
+
+```
 
 ---
 
 # Other GraphQL Features
 
--   Type system
--   Subscriptions
+* Type system & introspection
+ * Allows writing advanced tools
+* Mutations
+  * Updates
+* Subscriptions
+  * Observable, real time updates. 
 
 ---
 
@@ -486,7 +603,13 @@ Deferred Response
 
 ---
 
-<Image src="defer.gif" size="contain" />
+<img style="display: block; width: 75%; margin: 0 auto;" src="defer.gif" />
+
+<small>
+  <center>
+  https://blog.apollographql.com/introducing-defer-in-apollo-server-f6797c4e9d6e
+  </center>
+</small>
 
 ---
 
