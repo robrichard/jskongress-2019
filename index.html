@@ -671,6 +671,91 @@ function fetchGraphQLXHR({query, onNext, onComplete}) {
 }
 ```
 ]
+
+---
+
+# Why is this field `null`?
+
+.flex[
+
+.column[
+because it's `null`?
+  
+or because it's loading? 
+]
+
+
+.column.codeLine[
+
+.smallJson[
+Initial Response
+<br />
+
+```json
+{
+  "data": {
+    "talks": [{
+      "title": "Opening Keynote",
+      "time": "10:30-11:00",
+      "speaker": {
+        "name": "Sean Larkin"
+      },
+*     "comments": null
+    }, ...]
+  }
+}
+```
+]
+
+Deferred Response
+<br />
+
+```json
+// Patch for "comments", sent for each talk
+{
+  "path": ["talks", 0, "comments"],
+  "data":  [{
+    "body": "Loved this!"
+  }]
+}
+```
+]
+]
+
+---
+# Apollo Client
+
+Supports `@defer` in alpha build
+
+Provides `loadingState` prop to distinguish between pending and `null`.
+
+```jsx
+<Query query={query}>
+  {({ loading, data, loadingState }) => {
+    if (loading) {
+      // entire query not yet loaded
+      return <div>loading...</div>;
+    }
+
+    return (
+      <>
+        <h1>{data.talk.title}</h1>
+        <h3>Comments</h3>
+        {loadingState.talk.comments ? 
+          <div>loading...</div>
+          :
+          <ul>
+            {data.talk.comments.map(({body}) => (
+              <li>{body</li><
+            ))}
+          </ul>
+        }
+      </>
+    );
+  }}
+</Query>
+```
+
 ---
 # That's all!
 * https://www.1stdibs.com
