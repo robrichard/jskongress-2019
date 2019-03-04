@@ -628,12 +628,6 @@ function fetchGraphQL({query, onNext, onComplete}) {
 ]
 
 ---
-# Open source implementation
-
-* https://github.com/relay-tools/fetch-multipart-graphql/
-* Contains code to fetch and parse MultiPart HTML Response
-
----
 # Browser Support?
 
 * ReadableStream API
@@ -671,6 +665,13 @@ function fetchGraphQLXHR({query, onNext, onComplete}) {
 }
 ```
 ]
+
+---
+# Open source implementation
+
+* Included in apollo-client alpha 
+* github.com/relay-tools/fetch-multipart-graphql/
+  * Contains code to fetch and parse MultiPart HTML Response
 
 ---
 
@@ -711,7 +712,7 @@ Deferred Response
 <br />
 
 ```json
-// Patch for "comments", sent for each talk
+// Patch for "comments"
 {
   "path": ["talks", 0, "comments"],
   "data":  [{
@@ -738,7 +739,7 @@ Provides `loadingState` prop to distinguish between pending and `null`.
     }
 
     return (
-      <>
+      <React.Fragment>
         <h1>{data.talk.title}</h1>
         <h3>Comments</h3>
         {loadingState.talk.comments ? 
@@ -750,11 +751,156 @@ Provides `loadingState` prop to distinguish between pending and `null`.
             ))}
           </ul>
         }
-      </>
+      </React.Fragment>
     );
   }}
 </Query>
 ```
+
+---
+# Relay
+
+* Doesn't currently support @defer directly
+* Does support observables, so it can work with the previous code example
+
+---
+# Relay
+
+Relay's strength is combining GraphQL Fragments with React Components
+
+```jsx
+
+function Commments({talk}) {
+  return (
+    <ul>
+      {talk.comments.map(({body}) => (
+        <li>{body}</li>
+      ))}
+    </ul>
+  )
+}
+
+export default createFragmentContainer(Comments, {
+  talk: graphql`
+    fragment Comments on Talk {
+      comments {
+        body
+      }
+    }
+  `
+})
+
+```
+
+---
+# Relay
+
+Deferred fragments and React Suspense are a perfect fit. 
+
+```javascript
+
+function Talk({talk}) {
+  return (
+    <React.Fragment>
+      <h1>{talk.title}</h1>
+      <h3>Comments</h3>
+      <React.Suspense fallback={<div>loading...</div>}
+        <Comments talk={talk} />
+      </React.Suspense>
+    </React.Fragment>
+  )
+}
+
+export default createFragmentContainer(Comments, {
+  talk: graphql`
+    fragment Talk on Talk {
+      title
+      ...Comments @defer
+    }
+  `
+})
+
+```
+
+---
+# `@stream` directive
+
+* Similar to @defer, but for lists
+* Will load each element of the list as it is ready
+* Get the first item in the list on the screen without waiting for the whole list
+
+
+---
+# `@stream` directive
+
+.flex[
+
+.column.codeLine[
+
+REQUEST
+
+.smallJson[
+```graphql
+query {
+  talks @stream {
+    title
+    time
+    speaker {
+      name
+    }
+  }
+}
+```
+]
+]
+.column.codeLine[
+
+.smallJson[
+```json
+// Initial Response
+{
+  "data": {
+    "talks": []
+  }
+}
+```
+]
+.smallJson[
+```json
+// Patch for first talk
+{
+  "path": ["talks", 0],
+  "data":  {
+    "title": "Opening Keynote",
+    "time": "10:30-11:00",
+    "speaker": {
+      "name": "Sean Larkin"
+    }
+  }
+}
+```
+.smallJson[
+
+```json
+// Patch for second talk
+{
+  "path": ["talks", 1],
+  "data":  {
+    "title": "Knock knock, who’s there?",
+    "time": "11:30-12:00",
+    "speaker": {
+      "name": "Sam Bellen"
+    }
+  }
+}
+```
+]
+]
+
+
+]
+]
+
 
 ---
 # That's all!
