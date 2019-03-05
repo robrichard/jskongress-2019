@@ -199,6 +199,11 @@ class: center, middle
 -   Minimize transfer size
 -   Minimize round trips
 
+???
+* This talk is about different ways of loading data in a web application and the trade offs involved.
+* Ideally we want to minimize the transfer size and the number of round trips before we can display something.
+      
+
 ---
 
 # Example App
@@ -213,12 +218,22 @@ class: center, middle
 
 ]
 
+???
+* I'm going to use this simple app as an example.
+* It's displaying information about JSKongress.
+* It will list out the talks, speakers, and lets say you have the ability to leave comments, so we'll display those too.
+
 ---
 
 # Rest
 
 -   Typically one resource per request
 -   Could require multiple round trips or waterfalls for each resource
+
+???
+* The first option for building the API for this would be to use REST-like endpoints.
+* Typically you would create endpoints that return one resource per request.
+* Let's see what that looks like
 
 ---
 
@@ -270,9 +285,8 @@ class: center, middle
 ]
 ]
 ]
+
 ---
-
-
 # Rest waterfall
 
 <img src="rest-waterfall.png" />
