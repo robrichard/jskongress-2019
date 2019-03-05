@@ -286,10 +286,21 @@ class: center, middle
 ]
 ]
 
+???
+
+* First we're going to load all the talks using the talks endpoint.
+* We can use the returned talkId and speakerId to make additional calls to the speaker endpoint and comments endpoint to ge the rest of the data
+
 ---
 # Rest waterfall
 
 <img src="rest-waterfall.png" />
+
+???
+
+* The result of this is a "waterfall" of requests. 
+* We can't start loading the speakers and the comments until the first request is finished.
+* After that we can make all of those requests in parallel.
 
 ---
 # GraphQL
