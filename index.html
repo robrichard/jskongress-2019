@@ -654,6 +654,12 @@ Wait for first request to finish before second can begin
 -   server can send results that are ready while the others are still parsing
 -   client can begin rendering as data is received
 
+???
+* There's another experimental approach to this problem
+* This is implemented as a GraphQL directive called `@defer`
+* It allows the GraphQL server to send data as soon as its ready, without waiting until the entire request is onComplete
+* Your client code can begin rendering as soon as it starts getting results from GraphQL
+
 ---
 # `@defer` directive
 
@@ -726,6 +732,14 @@ Deferred Response
 ]
 ]
 
+???
+
+* This is what the @defer directive looks like in action
+* We added it to the comments field and now there are actually two responses
+* In the first, comments is null. This is sent as soon as the rest of the data is finished loading, before comments is loaded.
+* Once the comments are loaded, a new response is sent. We call it a "patch" response since it is meant to be applied to the previous response.
+* The patch response contains the a path array, indicating where in the initial response the data should be applied, as well as the actual data
+* You'll need a graphql client that understand how to piece these together.
 
 ---
 
@@ -737,14 +751,44 @@ Deferred Response
   </center>
 </small>
 
+???
+* I thought this animation provided by Apollo is a good example of what using @defer looks like to the end user
+* They're using multiple levels of @defer here, and data is incrementally rendered as its loaded
+* Compare it to the example without defer, where the whole page loads when exactly the last piece of data arrives.
+
+---
+
+# When to use `@defer`?
+
+* Field is expensive to load..
+* Field is not on the critical path for interactivity.
+* Field is expensive to send.
+
+???
+
+* There's three cases where using @defer is super useful
+* Field is expensive to load. This includes private data that is not cached (like user progress), or information that requires more computation on the backend (like calculating price quotes on Airbnb).
+* Field is not on the critical path for interactivity. This includes the comments section of a story, or the number of claps received.
+* Field is expensive to send. Maybe it is not expensive to load this data, but there is just a lot of it. This will be slow to send over slow networks so it would be beneficial to defer it.
+
 ---
 
 # Implementation: HTTP Streaming
 
--   Multipart response like file uploads and emails
--   HTTP connection stays open until all data is received.
--   Requires a client that can stream data
-    -   loop over data until enough bytes are read
+* No websockets!
+* HTTP connection stays open until all data is received.
+* Multipart response like file uploads and emails
+* Requires a client that can stream data
+  * loop over data until enough bytes are read
+
+???
+
+* Now let's talk about how this is implemented
+* We're not using websockets here. We can accomplish this with less complex tools.
+* We're going to use a standard HTTP connection and send multiple JSON objects over it.
+* This single connection will stay open until all of the data is sent.
+* It's going to use a "multipart" http response. You may have seen something similar in file uploads.
+* We'll also need a client that can understand this response.
 
 ---
 # HTTP Streaming
@@ -783,6 +827,13 @@ Content-Length: 340
 ```
 ]
 ]
+
+??? 
+* First let's take a closer look at what the multipart http response looks like.
+* Instead of a single request returning a single JSON object, we have multiple JSON objects.
+* Each "part" of the multipart response contains a header, indicating the content type. This format allows mixed types, but we're only using json here.
+* There's also a content-length header. This lets our parser know how many bytes to read before parsing the json.
+* After the initial data is sent, the connection will remain open until each patch is sent.
 
 ---
 # Standard GraphQL Network Layer
