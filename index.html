@@ -310,6 +310,13 @@ class: center, middle
 * Open source version published in July 2015
 * Specification: https://facebook.github.io/graphql
 
+???
+* Let's talk about GraphQL now. 
+* I'll give a brief overview in case you're not familiar
+* It's a language for querying data. 
+* It was developed by Facebook to build their mobile apps
+* It's published as a specification, so there are now many server and client implementations as well as developer tools that all interoperate nicely.
+
 ---
 # GraphQL
 
@@ -325,6 +332,15 @@ class: center, middle
 </blockquote>
 
 ## <center><cite>- graphql.org</cite></center>
+
+???
+* Here's a quote from the graphql website
+* "GraphQL queries access not just the properties of one resource but also smoothly follow
+  references between them. While typical REST APIs require loading from multiple URLs, GraphQL
+  APIs get all the data your app needs in a single request. Apps using GraphQL can be quick even
+  on slow mobile network connections."
+* One of the main goals of GraphQL is to cut down on round trips. 
+* It allows you to query for any amount of nested data in a single request
 
 ---
 # Example App with GraphQL
@@ -386,22 +402,46 @@ RESPONSE
 ]
 ]
 
+???
+* Let's see what this looks like for our conference app.
+* In GraphQL there is just one endpoint. Here it's /api/graphql.
+* The client sends a request with a GraphQL query to this endpoint
+* If you squint at it, a GraphQL request kind of looks like JSON, with only the keys
+* The GraphQL server will process this response and return actual JSON in the same shape as the GraphQL request
+* Since there's only one request we don't have to write code to coordinate sending the waterfall of REST requests.
+* It's pretty common to wrap a REST api with a GraphQL server. 
+* It's a mostly low cost way to start getting the benefits of using GraphQL in your client code without having the rewrite your whole backend from scratch.
+
 ---
 
 # Why are fewer round trips faster?
 
 -   Even if it’s same data speed
 -   Even if you’re wrapping a REST api?
--   GraphQL server makes fast reliable network requests, same datacenter
--   Trimmed down data is sent over slow, spotty internet
+
+
+???
+* The next question is, do you get any performance benefits by writing a GraphQL server, if all its doing is wrapping a REST api?
 
 ---
 
 # Why are fewer round trips faster?
 
+GraphQL server makes fast reliable network requests, same datacenter
+
+Trimmed down data is sent over slow, spotty internet
+
 .flex[
 <img style="width: 100%" src="graphql-waterfall.png" />
 ]
+
+???
+* We're still making the same requests that the REST version of that app was making
+* but it will be faster.
+* because all of those round trips are happening over a fast datacenter connection. 
+* Maybe they are even on the same physical server
+* If those REST endpoints returned additional data that was not part of the GraphQL query, it will be trimmed down to the slim graphql response 
+* A single small efficient payload is what gets sent over slow unreliable public internet.
 
 ---
 
@@ -414,7 +454,7 @@ RESPONSE
 query ($first: Int!) {
   talks {
     speaker {
-      picture(size: 300) {
+*     picture(size: 300) {
         width
         height
         url
@@ -448,6 +488,14 @@ query ($first: Int!) {
 
 ]
 
+???
+
+* There's a few additional GraphQL features I want to talk about.
+* The first is that every field in GraphQL can be thought of as a function
+* Any field can take arguments
+* In this case I added a picture field on the speaker, which accepts a size argument
+* In your server implementation, you can write a function called a resolver to compute what the results of a field can be
+* This gives you a lot of flexibility in defining your API
 
 ---
 # Variables
@@ -468,6 +516,17 @@ query ($size: Int!) {
 }
 
 ```
+
+```json
+{ "size": 30 }
+```
+
+???
+
+* The next GraphQL feature is variables.
+* This lets you define parameters that a GraphQL query can accept.
+* You can then send an additional JSON payload with the variable data
+
 
 ---
 # Fragments
@@ -493,13 +552,22 @@ fragment Comments on Talk {
 }
 ```
 
+???
+
+* GraphQL also supports fragments.
+* Fragments are reusable portions of a GraphQL Query.
+* You can define a fragment and reuse it in multiple places in your query
+* You can think of it as a building block of a GraphQL query. 
+* Like how a React component is a building block of a React application 
+
+
 ---
 # Directives
 
 * Uses the @ character
 * Can take arguments
 * @include and @skip built into GraphQL Specification
-* Used by other frameworks for experimental features
+* Experimental or framework specific features
 
 ```graphql
 query($showSpeaker: Boolean!) {
@@ -514,23 +582,48 @@ query($showSpeaker: Boolean!) {
 
 ```
 
----
-
-# Other GraphQL Features
-
-* Type system & introspection
- * Allows writing advanced tools
-* Mutations
-  * Updates
-* Subscriptions
-  * Observable, real time updates. 
+???
+* directives are these tokens you can add to almost any part of a GraphQL query
+* The spec defines two of them: include and skip.
+* Those let you conditionally request fields from a graphql query based on a variable value
+* Directives are also used for expermental or framework specific graphql features
 
 ---
 
+# Subscriptions
 
-# Downside to batching all requests up
+* Allow real time updates
+* Modeled as an Observable
 
--   Your page loads as fast as its slowest piece of data.
+```graphql
+subscription {
+  talks {
+    title 
+    time
+    speaker @include(if: $showSpeaker) {
+      name
+    }
+  }
+}
+```
+
+???
+* GraphQL supports real time updates with subscriptions
+* In this case instead of a query response model, it's closer to an observable.
+* From one query you will receive multiple responses when the data changes
+* Usually implemented with a technology like websockets
+
+---
+# Can we optimize further?
+
+* Downsides to batching up all requests?
+* Your page loads as fast as its slowest piece of data.
+
+???
+* All of that is great and makes for a very seamless and efficient UI with great developer experience.
+* But we could optimze further.
+* There are downsides to batching up all of your requests
+* Your page will load only as fast as its slowest piece of data
 
 ---
 
