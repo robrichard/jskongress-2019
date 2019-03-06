@@ -619,6 +619,8 @@ subscription {
 * Downsides to batching up all requests?
 * Your page loads as fast as its slowest piece of data.
 
+<img style="width: 80%; display:block; margin: 0 auto" src="graphql-waterfall2.png" />
+
 ???
 * All of that is great and makes for a very seamless and efficient UI with great developer experience.
 * But we could optimze further.
@@ -629,14 +631,20 @@ subscription {
 
 # Solution: Multiple graphql queries
 
--   Could introduce multiple round trips or waterfalls
--   Needs to wait for first request to finish before second can begin
--   Similar management you had to do with REST
+Wait for first request to finish before second can begin
 
----
-# Multiple graphql queries
+<img style="width: 80%; display:block; margin: 0 auto" src="graphql-waterfall-multiple.png" />
 
-.flex-center[<img style="width: 80%; height:100%" src="graphql-waterfall-multiple.png" />]
+???
+
+* This is the most common solution to this.
+* You split your code up into mnultiple graphql queries and execute them as soon as you can 
+* This is the most common approach to this issue
+* The downsides are you need to write code to coordinate these requests, similar to what we did with our REST requests
+* Also note that we waited until both the schedule and speakers finished loading, instead of just the schedule, so it will be slower overall.
+* You could keep reworking this by splitting up your requests into even more graphql queries, but each time you do this you add more complexity to your code.
+
+
 ---
 
 # `@defer` directive
