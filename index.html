@@ -791,15 +791,14 @@ Deferred Response
 * We'll also need a client that can understand this response.
 
 ---
+
 # HTTP Streaming
 
-.flex[
-
-.column[
-```
+.test[
+```json
 ---
 Content-Type: application/json
-Content-Length: 790
+Content-Length: 590
 
 {
   "data": {
@@ -816,7 +815,7 @@ Content-Length: 790
 
 ---
 Content-Type: application/json
-Content-Length: 340
+Content-Length: 140
 
 {
   "path": ["talks", 0, "comments"],
@@ -824,11 +823,12 @@ Content-Length: 340
     "body": "Loved this!"
   }]
 }
+
 ```
 ]
-]
 
-??? 
+???
+
 * First let's take a closer look at what the multipart http response looks like.
 * Instead of a single request returning a single JSON object, we have multiple JSON objects.
 * Each "part" of the multipart response contains a header, indicating the content type. This format allows mixed types, but we're only using json here.
