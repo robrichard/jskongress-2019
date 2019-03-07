@@ -844,7 +844,7 @@ Returns a promise with data
 
 ```javascript
   function fetchGraphQL(query) {
-    return fetch('/graphql', {
+    return fetch('/api/graphql', {
       headers: {
         'content-type': 'application/json'
       },
@@ -854,8 +854,15 @@ Returns a promise with data
     })
   }
 ```
-
 ]
+
+???
+
+* So here's an example of a standard GraphQL Network Layer
+* A network layer is just a function you write that has the logic to communication with your GraphQL server
+* This one is pretty straight forward. All it does is make an HTTP request to the GraphQL server and return the results.
+* This will work for the standard GraphQL use cases but it needs to be more complex to handle the defer directive.
+
 
 ---
 # Streaming GraphQL Network Layer
@@ -870,7 +877,7 @@ Similar to GraphQL Subscriptions
 
 ```javascript
 function fetchGraphQL({query, onNext, onComplete}) {
-  return fetch('/graphql', {
+  return fetch('/api/graphql', {
     headers: {
       'content-type': 'application/json'
     },
@@ -893,39 +900,18 @@ function fetchGraphQL({query, onNext, onComplete}) {
 
 ]
 
----
-# Parsing MultiPart HTTP Responses
+???
 
-.bigCode[
-
-Custom PatchResolver class. 
-
-Store previous data and apply and return patches
-
-```javascript
-function fetchGraphQL({query, onNext, onComplete}) {
-  return fetch('/graphql', {
-    headers: {
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({query})
-  }).then(response => {
-    const textDecoder = new TextDecoder();
-*   const patchResolver = new PatchResolver(r => onNext(r));
-    reader.read().then(function sendNext({ value, done }) {
-      if (!done) {
-        const plaintext = textDecoder.decode(value);
-*       patchResolver.handleChunk(plaintext);
-        reader.read().then(sendNext);
-      } else {
-        onComplete();
-      }
-    });
-  })
-}
-```
-
-]
+* Now in this example we have updated the network layer to support streaming connections.
+* First thing, we changed the interface to act like an obversable instead of returning a Promise.
+* This function will call `onNext` each time we have a new fully constructed JSON object.
+* It will call onComplete after the network connection is closed, meaning all of the patches have been received.
+* This is a similar model to GraphQL Subscriptions, From one request, there are many payloads.
+* We're using the Readable Streams API to read the network data. This is a new browser api built ontop of `fetch`
+* It allows you to set up a "reader" which will call a callback as soon as some bytes are received from the network connection.
+* We'll need a custom object that I called "PatchResolver"
+* This object has a method that we can call with some bytes everytime they arrive on the network connection.
+* When it has enough bytes to read a full json object, it will call the onNext callback.
 
 ---
 # Browser Support?
@@ -936,6 +922,13 @@ function fetchGraphQL({query, onNext, onComplete}) {
   * ✅ Safari >= v10
   * ✅ Edge
   * ❌ Internet Explorer
+
+???
+
+* You may be wondering what the browser support is for the Readable Stream API. 
+* It's pretty good but not great.
+* It's supported in all recent versions of evergreen browsers. Firefox was the most recent one to add support.
+* No surpises here that it's not supported in IE.
 
 ---
 # Use XMLHttpRequest as a fallback
@@ -966,12 +959,26 @@ function fetchGraphQLXHR({query, onNext, onComplete}) {
 ```
 ]
 
+???
+
+* But we don't actually need it to make this work! 
+* XMLHttpRequest allows you to stream data.
+* This has been around since about IE 7
+* The `onReadyStateChange` callback lets us read the current data as it's been loaded and we can handle it in exactly the same way.
+
 ---
 # Open source implementation
 
 * Included in apollo-client alpha 
 * github.com/relay-tools/fetch-multipart-graphql/
   * Contains code to fetch and parse MultiPart HTML Response
+
+???
+
+* You probably don't want to right this stuff all by hand.
+* I also left out error handling to keep the examples clean.
+* The good news is that Apollo Client includes this in an alpha version.
+* I also wrote an open source library called "fetch-multipart-graphql", if you want to use this without apollo.
 
 ---
 
