@@ -1130,6 +1130,7 @@ export default createFragmentContainer(Comments, {
 
 * Before we get into how defer might work with Relay, I want to show how Relay combines GraphQL fragments with React Components.
 * You colocate a fragment with a component and then that component has access to the fields defined in the component.
+* Not only that but it actually only, has access to the fields defined in the fragment so you get a high level of confidence when you are making changes to the fragment. 
 
 ---
 # Relay
@@ -1161,6 +1162,16 @@ export default createFragmentContainer(Comments, {
 
 ```
 
+???
+
+* You may have also heard about a new React feature that's in the works called Suspense.
+* It lets components halt rendering until they have their data.
+* React will render the closes fallback until the component is ready.
+* This is a perfect fit for colocated components and the @defer directive.
+* This example is a hypothetical approach that relay could take to supporting `@defer`
+* You could defer an entire graphql fragment, and react can suspend until the patch is received.
+* Then you don't have to worry about null data not being loaded, since your component won't be rendered until it's done loading.
+
 ---
 # `@stream` directive
 
@@ -1168,6 +1179,13 @@ export default createFragmentContainer(Comments, {
 * Will load each element of the list as it is ready
 * Get the first item in the list on the screen without waiting for the whole list
 
+???
+
+* There's also been some experiments with another directive that can take advantage of the HTTP streaming architechture.
+* This one is called "stream".
+* It's useful on lists of items.
+* It will allow you to start rendering the first item in the list before the rest of them have finished loading.
+* On small screens you might only have room to render the first one or two items, so it's nice to see it without waiting for the entire list to load.
 
 ---
 # `@stream` directive
@@ -1240,13 +1258,64 @@ query {
 ]
 ]
 
+???
+
+* This is what a response using the stream directive will look like
+* We're going to stream each of the talks
+* So instead of getting the whole list in one response, we get an empty array first.
+* Then a patch response is set for each object in the list
+* And of course you can use both the defer directive and the stream directive in the same query
+
+---
+# Current Status
+
+* @defer
+  * Implemented in Apollo Server and Apollo Client alphas
+  * Currently usable in Relay, can't distinguish between loading and null states
+  * WIP by Relay team 
+
+???
+
+* So the summarize the current status.
+* defer is available in Apollo alphas
+* It's usable in Relay, but without a solution for the issue of distinguishing loading and null states
+* The Relay team is working on adding support
+
+---
+# Current Status
+
+* @stream
+  * More experimental
+  * Not supported in Relay or Apollo
+
+???
+
+* @stream is even more experimental and not supported in either Relay or Apollo
+
+---
+# HTTP Streaming Architechture
+
+* Widely supported since IE 7
+* Has applications outside of GraphQL
+
+???
+
+* HTTP Streaming Architechture, what this is all based on, is widely supported by browsers.
+* I think it's very useful, but not widely used in front end applications.
+* It think the community can get very creative designing applications that make use of this architecture, even without GraphQL.
+
 ---
 # More Info
 * Lee Byron - GraphQL Future at react-europe 2016
   * https://www.youtube.com/watch?v=ViXL0YQnioU
 * Apollo Blog - Introducing @defer in Apollo Server
   * https://blog.apollographql.com/introducing-defer-in-apollo-server-f6797c4e9d6e
+  
+???
 
+* I put a few references here.
+* Lee Byron, one of the GraphQL co-creators did a great talk where the ideas behind @defer and @stream were first discussed
+* And the Apollo blog also has a great article on defer
 
 ---
 # That's all!
