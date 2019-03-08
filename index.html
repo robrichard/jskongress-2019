@@ -964,6 +964,7 @@ function fetchGraphQLXHR({query, onNext, onComplete}) {
 * But we don't actually need it to make this work! 
 * XMLHttpRequest allows you to stream data.
 * This has been around since about IE 7
+* This technique has not been used all that often, but I think it's pretty cool that its been widely supported for so long.
 * The `onReadyStateChange` callback lets us read the current data as it's been loaded and we can handle it in exactly the same way.
 
 ---
@@ -1030,6 +1031,13 @@ Deferred Response
 ]
 ]
 
+???
+
+* You may have noticed that when the inital response is returned, the deferred parts are null.
+* That could be problematic when you are writing your UI code to display this data.
+* Is it null because it's actually a null result, or is it null because the patch with the data hasn't been loaded yet?
+* Basically, the question is, should you render "no comments" or a loading spinner?
+
 ---
 # Apollo Client
 
@@ -1064,11 +1072,30 @@ Provides `loadingState` prop to distinguish between pending and `null`.
 </Query>
 ```
 
+???
+
+* This is where a GraphQL client will come in handy.
+* Apollo is one of the most popular GraphQL clients.
+* As I mentioned before, they have experimental support for the defer directive in an alpha release
+* They will help you solve this problem by passing a loading state object of all the deferred fields that are currently loading.
+* You can use this object to ensure your loading states are handled correctly.
+
 ---
 # Relay
 
 * Doesn't currently support @defer directly
 * Does support observables, so it can work with the previous code example
+* Experimental support in early development by the Relay team.
+
+???
+
+* Relay is another popular GraphQL client. 
+* It was open sourced by Facebook shortly after the GraphQL spec was released.
+* It's what we use at 1stdibs.
+* Relay currently doesn't support the @defer directive.
+* But it does support subscriptions and observables.
+* So we can use the network layer I showed before, but we won't be able to solve the null or loading problem until proper support is added.
+* The Relay team is currently working on experimental support for the defer directive.
 
 ---
 # Relay
@@ -1098,6 +1125,11 @@ export default createFragmentContainer(Comments, {
 })
 
 ```
+
+???
+
+* Before we get into how defer might work with Relay, I want to show how Relay combines GraphQL fragments with React Components.
+* You colocate a fragment with a component and then that component has access to the fields defined in the component.
 
 ---
 # Relay
