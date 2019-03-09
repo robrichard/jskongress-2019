@@ -985,7 +985,7 @@ function fetchGraphQLXHR({query, onNext, onComplete}) {
 
 * You probably don't want to right this stuff all by hand.
 * I also left out error handling to keep the examples clean.
-* The good news is that Apollo Client includes this in an alpha version.
+* The good news is that Apollo Client (which is one of the most popular graphql clients) includes this in an alpha version.
 * I also wrote an open source library called "fetch-multipart-graphql", if you want to use this without apollo.
 
 ---
@@ -1082,8 +1082,7 @@ Provides `loadingState` prop to distinguish between pending and `null`.
 ???
 
 * This is where a GraphQL client will come in handy.
-* Apollo is one of the most popular GraphQL clients.
-* As I mentioned before, they have experimental support for the defer directive in an alpha release
+* As I mentioned before, Apollo Client has experimental support for the defer directive in an alpha release
 * They will help you solve this problem by passing a loading state object of all the deferred fields that are currently loading.
 * You can use this object to ensure your loading states are handled correctly.
 
@@ -1101,7 +1100,7 @@ Provides `loadingState` prop to distinguish between pending and `null`.
 * It's what we use at 1stdibs.
 * Relay currently doesn't support the @defer directive.
 * But it does support subscriptions and observables.
-* So we can use the network layer I showed before, but we won't be able to solve the null or loading problem until proper support is added.
+* So we can use the network code I showed before, but we won't be able to solve the null or loading problem until proper support is added.
 * The Relay team is currently working on experimental support for the defer directive.
 
 ---
@@ -1137,7 +1136,8 @@ export default createFragmentContainer(Comments, {
 
 * Before we get into how defer might work with Relay, I want to show how Relay combines GraphQL fragments with React Components.
 * You colocate a fragment with a component and then that component has access to the fields defined in the component.
-* Not only that but it actually only, has access to the fields defined in the fragment so you get a high level of confidence when you are making changes to the fragment. 
+* Each component actually only has access to the fields defined in the fragment for that component.
+* This give you a high level of confidence when you are making changes to the fragment. 
 
 ---
 # Relay
@@ -1172,8 +1172,8 @@ export default createFragmentContainer(Comments, {
 ???
 
 * You may have also heard about a new React feature that's in the works called Suspense.
-* It lets components halt rendering until they have their data.
-* React will render the closes fallback until the component is ready.
+* It lets components halt rendering until all the data they require is loaded.
+* React will render the closest fallback until the component is ready.
 * This is a perfect fit for colocated components and the @defer directive.
 * This example is a hypothetical approach that relay could take to supporting `@defer`
 * You could defer an entire graphql fragment, and react can suspend until the patch is received.
