@@ -4,5 +4,8 @@
   "description": "Slides for Rob Richard's talk at JSKongress 2019",
   "repository": "git@github.com:robrichard/jskongress-2019.git",
   "author": "Rob Richard <rob@1stdibs.com>",
-  "private": true
+  "private": true,
+  "scripts": {
+    "build": "sh build.sh"
+  }
 }
