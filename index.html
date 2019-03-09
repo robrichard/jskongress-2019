@@ -7,40 +7,35 @@
       /*! global/fonts */
       @font-face {
         font-family: Miller Display Light;
-        src: url('https://a.1stdibscdn.com/dist/fonts/MillerDisplay/MillerDisplay-Light.woff')
-          format('woff');
+        src: url('public/MillerDisplay-Light.woff') format('woff');
         font-weight: 400;
         font-style: normal;
       }
 
       @font-face {
         font-family: Miller Display Light Italic;
-        src: url('https://a.1stdibscdn.com/dist/fonts/MillerDisplay/MillerDisplay-LightItalic.woff')
-          format('woff');
+        src: url('public/MillerDisplay-LightItalic.woff') format('woff');
         font-weight: 400;
         font-style: normal;
       }
 
       @font-face {
         font-family: Proxima Nova Light;
-        src: url('https://a.1stdibscdn.com/dist/fonts/ProximaNova/ProximaNova-Light.woff')
-          format('woff');
+        src: url('public/ProximaNova-Light.woff') format('woff');
         font-weight: 400;
         font-style: normal;
       }
 
       @font-face {
         font-family: Proxima Nova Light Italic;
-        src: url('https://a.1stdibscdn.com/dist/fonts/ProximaNova/ProximaNova-LightItalic.woff')
-          format('woff');
+        src: url('public/ProximaNova-LightItalic.woff') format('woff');
         font-weight: 400;
         font-style: normal;
       }
 
       @font-face {
         font-family: Proxima Nova SemiBold;
-        src: url('https://a.1stdibscdn.com/dist/fonts/ProximaNova/ProximaNova-Sbold.woff')
-          format('woff');
+        src: url('public/ProximaNova-Sbold.woff') format('woff');
         font-weight: 400;
         font-style: normal;
       }
@@ -182,16 +177,29 @@ class: center, middle
 
 ???
 
-* Hi! My name is Rob and I'm a Front-End Engineering @ 1stdibs.
+* Hi! My name is Rob and I'm a Front-End Engineer @ 1stdibs.
 
 ---
 
 <image style="width:100%" src="./1stdibs.png"/>
 
 ???
-* 1stdibs is an online marketplace for rare and desireable goods. We sell Vintage and Antique Furniture, Jewelry, Fashion, and Art.
+* 1stdibs is an online marketplace for rare and desireable goods. We sell Furniture, Jewelry, Fashion, and Art.
+
+
+---
+# 1stdibs
+
+* Front-End stack: Node, GraphQL, React, & Relay
+
+
+* Offices in New York and Vilnius, Lithuania
+
+???
 * Our front-end team is all-in on JavaScript. 
 * Our stack is Node, GraphQL, React, & Relay.
+* We have offices in New York and Vilnius.
+* Please get in touch with me if this sounds interesting to you!
 
 ---
 ## What are the best ways to load data into an application?
@@ -221,7 +229,7 @@ class: center, middle
 ???
 * I'm going to use this simple app as an example.
 * It's displaying information about JSKongress.
-* It will list out the talks, speakers, and lets say you have the ability to leave comments, so we'll display those too.
+* It will list out the talks, speakers, and lets say you also have the ability to leave comments, so we'll display those too.
 
 ---
 
@@ -289,7 +297,8 @@ class: center, middle
 ???
 
 * First we're going to load all the talks using the talks endpoint.
-* We can use the returned talkId and speakerId to make additional calls to the speaker endpoint and comments endpoint to ge the rest of the data
+* We can use the returned talkId and speakerId to make additional calls to the speaker endpoint and comments endpoint to get the rest of the data
+* You're going to have to write a bunch of code to coordinate these requests and make sure they are loaded in the correct order.
 
 ---
 # Rest waterfall
@@ -407,7 +416,7 @@ RESPONSE
 * In GraphQL there is just one endpoint. Here it's /api/graphql.
 * The client sends a request with a GraphQL query to this endpoint
 * If you squint at it, a GraphQL request kind of looks like JSON, with only the keys
-* The GraphQL server will process this response and return actual JSON in the same shape as the GraphQL request
+* The GraphQL server will process this request and return actual JSON in the same shape as the GraphQL request
 * Since there's only one request we don't have to write code to coordinate sending the waterfall of REST requests.
 * It's pretty common to wrap a REST api with a GraphQL server. 
 * It's a mostly low cost way to start getting the benefits of using GraphQL in your client code without having the rewrite your whole backend from scratch.
@@ -432,13 +441,12 @@ GraphQL server makes fast reliable network requests, same datacenter
 Trimmed down data is sent over slow, spotty internet
 
 .flex[
-<img style="width: 100%" src="graphql-waterfall.png" />
+<img style="width: 100%; margin-top: -80px" src="graphql-waterfall.png" />
 ]
 
 ???
-* We're still making the same requests that the REST version of that app was making
-* but it will be faster.
-* because all of those round trips are happening over a fast datacenter connection. 
+* We're still making the same requests that the REST version of that app was making.
+* But it will be faster, because all of those round trips are happening over a fast datacenter connection. 
 * Maybe they are even on the same physical server
 * If those REST endpoints returned additional data that was not part of the GraphQL query, it will be trimmed down to the slim graphql response 
 * A single small efficient payload is what gets sent over slow unreliable public internet.
@@ -558,7 +566,7 @@ fragment Comments on Talk {
 * Fragments are reusable portions of a GraphQL Query.
 * You can define a fragment and reuse it in multiple places in your query
 * You can think of it as a building block of a GraphQL query. 
-* Like how a React component is a building block of a React application 
+* It's kind of like how a React component is a building block of a React application 
 
 
 ---
@@ -611,7 +619,7 @@ subscription {
 * GraphQL supports real time updates with subscriptions
 * In this case instead of a query response model, it's closer to an observable.
 * From one query you will receive multiple responses when the data changes
-* Usually implemented with a technology like websockets
+* This is usually implemented with a technology like websockets
 
 ---
 # Can we optimize further?
@@ -633,13 +641,12 @@ subscription {
 
 Wait for first request to finish before second can begin
 
-<img style="width: 80%; display:block; margin: 0 auto" src="graphql-waterfall-multiple.png" />
+<img style="width: 100%; display:block; margin: -45px auto 0 auto" src="graphql-waterfall-multiple.png" />
 
 ???
-
-* This is the most common solution to this.
-* You split your code up into mnultiple graphql queries and execute them as soon as you can 
-* This is the most common approach to this issue
+* One solution is to just make multiple graphql queries
+* This is the most common approach to this issue.
+* You split your code up into multiple graphql queries and execute them as soon as you can 
 * The downsides are you need to write code to coordinate these requests, similar to what we did with our REST requests
 * Also note that we waited until both the schedule and speakers finished loading, instead of just the schedule, so it will be slower overall.
 * You could keep reworking this by splitting up your requests into even more graphql queries, but each time you do this you add more complexity to your code.
@@ -651,13 +658,13 @@ Wait for first request to finish before second can begin
 
 -   Experimental new GraphQL feature
 -   Gives clients a way to add boundaries to graphql requests
--   server can send results that are ready while the others are still parsing
--   client can begin rendering as data is received
+-   Server can send results that are ready while the others are still parsing
+-   Client can begin rendering as data is received
 
 ???
 * There's another experimental approach to this problem
 * This is implemented as a GraphQL directive called `@defer`
-* It allows the GraphQL server to send data as soon as its ready, without waiting until the entire request is onComplete
+* It allows the GraphQL server to send data as soon as its ready, without waiting until the entire request is completed.
 * Your client code can begin rendering as soon as it starts getting results from GraphQL
 
 ---
@@ -760,16 +767,16 @@ Deferred Response
 
 # When to use `@defer`?
 
-* Field is expensive to load..
-* Field is not on the critical path for interactivity.
-* Field is expensive to send.
+1. Field is expensive to load..
+2. Field is not on the critical path for interactivity.
+3. Field is expensive to send.
 
 ???
 
 * There's three cases where using @defer is super useful
-* Field is expensive to load. This includes private data that is not cached (like user progress), or information that requires more computation on the backend (like calculating price quotes on Airbnb).
-* Field is not on the critical path for interactivity. This includes the comments section of a story, or the number of claps received.
-* Field is expensive to send. Maybe it is not expensive to load this data, but there is just a lot of it. This will be slow to send over slow networks so it would be beneficial to defer it.
+1. When a field is expensive to load. Maybe it's data that's not cached, or data that requires a lot of computation, or just something that is expensive to look up.
+2. When a field is not on the critical path for interactivity. Maybe it's the comments section of your app or something else that's not super critical.
+3. When a field is expensive to send. Maybe it is not expensive to load this data, but there is just a lot of it. This will be slow to send over slow networks so it would be beneficial to defer it.
 
 ---
 
@@ -832,7 +839,7 @@ Content-Length: 140
 * First let's take a closer look at what the multipart http response looks like.
 * Instead of a single request returning a single JSON object, we have multiple JSON objects.
 * Each "part" of the multipart response contains a header, indicating the content type. This format allows mixed types, but we're only using json here.
-* There's also a content-length header. This lets our parser know how many bytes to read before parsing the json.
+* There's also a content-length header. This lets our parser know how many bytes to read before it can begin parsing the json.
 * After the initial data is sent, the connection will remain open until each patch is sent.
 
 ---
@@ -926,9 +933,9 @@ function fetchGraphQL({query, onNext, onComplete}) {
 ???
 
 * You may be wondering what the browser support is for the Readable Stream API. 
-* It's pretty good but not great.
-* It's supported in all recent versions of evergreen browsers. Firefox was the most recent one to add support.
-* No surpises here that it's not supported in IE.
+* It's actually pretty good.
+* It's supported in all recent versions of evergreen browsers. Firefox was the most recent one to add support in January of this year.
+* And I don't think anyone here is surpised that it's not supported in Internet Explorer.
 
 ---
 # Use XMLHttpRequest as a fallback
@@ -961,11 +968,11 @@ function fetchGraphQLXHR({query, onNext, onComplete}) {
 
 ???
 
-* But we don't actually need it to make this work! 
+* But we don't actually need Readable Streams to make this work! 
 * XMLHttpRequest allows you to stream data.
-* This has been around since about IE 7
+* This has been around since about Internet Explorer 7
 * This technique has not been used all that often, but I think it's pretty cool that its been widely supported for so long.
-* The `onReadyStateChange` callback lets us read the current data as it's been loaded and we can handle it in exactly the same way.
+* In the code example here, the `onReadyStateChange` callback lets us read the current data as it's been loaded and we can handle it in exactly the same way.
 
 ---
 # Open source implementation
@@ -1329,10 +1336,7 @@ query {
 
 
     </textarea>
-    <script
-      src="https://remarkjs.com/downloads/remark-latest.min.js"
-      type="text/javascript"
-    ></script>
+    <script src="public/remark-latest.min.js" type="text/javascript"></script>
     <script type="text/javascript">
       var slideshow = remark.create({
         // highlightLanguage: 'javascript',
@@ -1340,6 +1344,7 @@ query {
         highlightLines: true,
         scroll: false,
         ratio: '4:3',
+        slideNumberFormat: '',
       });
     </script>
   </body>
