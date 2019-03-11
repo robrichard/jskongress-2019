@@ -43,12 +43,14 @@ const data = [
   },
 ];
 
+let i = 1;
+
 const MyGraphQLSchema = new GraphQLSchema({
   query: new GraphQLObjectType({
     name: 'Query',
     fields: {
       talks: {
-        resolve: () => data,
+        resolve: () => new Promise(resolve => setTimeout(() => resolve(data), 1000)),
         type: new GraphQLList(
           new GraphQLObjectType({
             name: 'Talk',
@@ -65,7 +67,10 @@ const MyGraphQLSchema = new GraphQLSchema({
               },
               comments: {
                 resolve: root =>
-                  new Promise(resolve => setTimeout(() => resolve(root.comments), 3000)),
+                  new Promise(resolve => {
+                    setTimeout(() => resolve(root.comments), i * 1000);
+                    i++;
+                  }),
                 type: new GraphQLList(
                   new GraphQLObjectType({
                     name: 'Comment',

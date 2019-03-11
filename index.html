@@ -774,6 +774,17 @@ Deferred Response
 * You'll need a graphql client that understand how to piece these together.
 
 ---
+
+<img style="display: block; width: 80%; margin:0 auto;" src="defer-curl.gif" />
+
+???
+
+* This is what it looks like when you make this request on the command line with curl.
+* You can see how each of the JSON objects are sent over the same connection.
+* They're sent as soon as the data is ready
+* and the connection is closed after the last one is sent.
+
+---
 # Defer waterfall
 
 <img style="display: block; width: 100%; margin: -40px auto 0 auto;" src="defer-waterfall.png" />
