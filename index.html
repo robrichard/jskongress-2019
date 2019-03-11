@@ -774,6 +774,21 @@ Deferred Response
 * You'll need a graphql client that understand how to piece these together.
 
 ---
+# Defer waterfall
+
+<img style="display: block; width: 100%; margin: -40px auto 0 auto;" src="defer-waterfall.png" />
+
+???
+
+* Going back to our waterfall chart.
+* This one is exactly the same as the original GraphQL chart
+* But we are able to start rendering before the comments have finished loading
+* There is no overhead added because you don't need to send another request to the GraphQL server
+* Since we decided to only defer the comments, we do need to wait for the speakers to load before anything can be rendered.
+* but you have the choice of rendering earlier too. 
+* It's a trade off of how fast you want the initial render to be, vs how many additional loading states you will have after that
+
+---
 
 <img style="display: block; width: 75%; margin: 0 auto;" src="defer.gif" />
 
