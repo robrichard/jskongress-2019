@@ -687,10 +687,11 @@ Wait for first request to finish before second can begin
 -   Client can begin rendering as data is received
 
 ???
-* There's another experimental approach to this problem
-* This is implemented as a GraphQL directive called `@defer`
+* There's another approach to this problem
+* This is implemented as an experimental GraphQL directive called `@defer`
 * It allows the GraphQL server to send data as soon as its ready, without waiting until the entire request is completed.
 * Your client code can begin rendering as soon as it starts getting results from GraphQL
+* This lets you decide what is the most important thing to show your users and make sure it is not delayed by anything else.
 
 ---
 # `@defer` directive
@@ -767,7 +768,8 @@ Deferred Response
 ???
 
 * This is what the @defer directive looks like in action
-* We added it to the comments field and now there are actually two responses
+* I noticed that it is slow to load comments in our app, so I've added the defer directive to that field.
+* And now there are multiple responses
 * In the first, the comments are null. This is sent as soon as the rest of the data is finished loading, before the comments are loaded.
 * Once the comments are loaded, a new response is sent. We call it a "patch" response since it is meant to be applied to the previous response.
 * The patch response contains a path array, indicating where in the initial response the data should be applied, as well as the actual data
