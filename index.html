@@ -199,7 +199,7 @@ class: center, middle
 * Our front-end team is all-in on JavaScript. 
 * Our stack is Node, GraphQL, React, & Relay.
 * We have offices in New York and Vilnius.
-* Please get in touch with me if this sounds interesting to you!
+<!-- * Please get in touch with me if this sounds interesting to you! -->
 
 ---
 ## What are the best ways to load data into an application?
@@ -419,7 +419,7 @@ RESPONSE
 * The GraphQL server will process this request and return actual JSON in the same shape as the GraphQL request
 * Since there's only one request we don't have to write code to coordinate sending the waterfall of REST requests.
 * It's pretty common to wrap a REST api with a GraphQL server. 
-* It's a mostly low cost way to start getting the benefits of using GraphQL in your client code without having the rewrite your whole backend from scratch.
+* It's a mostly low cost way to start getting the benefits of using GraphQL in your client code without having to rewrite your whole backend from scratch.
 
 ---
 
@@ -622,6 +622,32 @@ subscription {
 * This is usually implemented with a technology like websockets
 
 ---
+# Developer tools
+
+* Type system and introspection capabilities enables powerful developer tools
+
+<img style="width: 100%; display:block; margin: 0 auto" src="graphiql.gif" />
+
+???
+* GraphQL's built in type system and introspection makes it possible to build really powerful developer tools
+* You get context aware autocomplete and documentation right in your IDE.
+* This is a video of a tool called GraphiQL, which is an in-browser GraphQL IDE. 
+* There's also editer plugins that give you the same features.
+
+---
+# GraphQL experience
+
+* All these features give you a great user and developer experience.
+* 1stdibs has been using GraphQL successfully for over three years.
+* Growing ecosystem of libraries and tools
+
+???
+
+* All of these features add up to a great user and developer experience.
+* At 1stdibs we have been using GraphQL successfully for over three years.
+* And while you could build a lot of these features into REST apis, you wouldn't be able to take advantage of the ecosystem of existing GraphQL libraries and tools.
+
+---
 # Can we optimize further?
 
 * Downsides to batching up all requests?
@@ -630,8 +656,7 @@ subscription {
 <img style="width: 80%; display:block; margin: 0 auto" src="graphql-waterfall2.png" />
 
 ???
-* All of that is great and makes for a very seamless and efficient UI with great developer experience.
-* But we could optimze further.
+* But could we optimze GraphQL even more?
 * There are downsides to batching up all of your requests
 * Your page will load only as fast as its slowest piece of data
 
@@ -743,9 +768,9 @@ Deferred Response
 
 * This is what the @defer directive looks like in action
 * We added it to the comments field and now there are actually two responses
-* In the first, comments is null. This is sent as soon as the rest of the data is finished loading, before comments is loaded.
+* In the first, the comments are null. This is sent as soon as the rest of the data is finished loading, before the comments are loaded.
 * Once the comments are loaded, a new response is sent. We call it a "patch" response since it is meant to be applied to the previous response.
-* The patch response contains the a path array, indicating where in the initial response the data should be applied, as well as the actual data
+* The patch response contains a path array, indicating where in the initial response the data should be applied, as well as the actual data
 * You'll need a graphql client that understand how to piece these together.
 
 ---
@@ -838,7 +863,7 @@ Content-Length: 140
 
 * First let's take a closer look at what the multipart http response looks like.
 * Instead of a single request returning a single JSON object, we have multiple JSON objects.
-* Each "part" of the multipart response contains a header, indicating the content type. This format allows mixed types, but we're only using json here.
+* Each "part" of the multipart response contains a header, indicating the content type. This format allows mixed types, but we're only going to use JSON here.
 * There's also a content-length header. This lets our parser know how many bytes to read before it can begin parsing the json.
 * After the initial data is sent, the connection will remain open until each patch is sent.
 
@@ -866,7 +891,7 @@ Returns a promise with data
 ???
 
 * So here's an example of a standard GraphQL Network Layer
-* A network layer is just a function you write that has the logic to communication with your GraphQL server
+* A network layer is just a function you write that has the logic to communicate with your GraphQL server
 * This one is pretty straight forward. All it does is make an HTTP request to the GraphQL server and return the results.
 * This will work for the standard GraphQL use cases but it needs to be more complex to handle the defer directive.
 
@@ -934,7 +959,7 @@ function fetchGraphQL({query, onNext, onComplete}) {
 
 * You may be wondering what the browser support is for the Readable Stream API. 
 * It's actually pretty good.
-* It's supported in all recent versions of evergreen browsers. Firefox was the most recent one to add support in January of this year.
+* It's supported in all recent versions of evergreen browsers. Firefox was the most recent one, adding support in January of this year.
 * And I don't think anyone here is surpised that it's not supported in Internet Explorer.
 
 ---
@@ -1069,7 +1094,7 @@ Provides `loadingState` prop to distinguish between pending and `null`.
           :
           <ul>
             {data.talk.comments.map(({body}) => (
-              <li>{body</li><
+              <li>{body}</li>
             ))}
           </ul>
         }
@@ -1135,16 +1160,14 @@ export default createFragmentContainer(Comments, {
 ???
 
 * Before we get into how defer might work with Relay, I want to show how Relay combines GraphQL fragments with React Components.
-* You colocate a fragment with a component and then that component has access to the fields defined in the component.
+* You colocate a fragment with a component and then that component has access to the fields defined in the fragment.
 * Each component actually only has access to the fields defined in the fragment for that component.
 * This give you a high level of confidence when you are making changes to the fragment. 
 
 ---
-# Relay
+# Deferred fragments and React Suspense are a perfect fit. 
 
-Deferred fragments and React Suspense are a perfect fit. 
-
-```javascript
+```jsx
 
 function Talk({talk}) {
   return (
@@ -1177,7 +1200,7 @@ export default createFragmentContainer(Comments, {
 * This is a perfect fit for colocated components and the @defer directive.
 * This example is a hypothetical approach that relay could take to supporting `@defer`
 * You could defer an entire graphql fragment, and react can suspend until the patch is received.
-* Then you don't have to worry about null data not being loaded, since your component won't be rendered until it's done loading.
+* Then you don't have to worry about handling null data, since your component won't be rendered until it's done loading.
 
 ---
 # `@stream` directive
@@ -1270,7 +1293,7 @@ query {
 * This is what a response using the stream directive will look like
 * We're going to stream each of the talks
 * So instead of getting the whole list in one response, we get an empty array first.
-* Then a patch response is set for each object in the list
+* Then a patch response is sent for each object in the list
 * And of course you can use both the defer directive and the stream directive in the same query
 
 ---
@@ -1283,7 +1306,7 @@ query {
 
 ???
 
-* So the summarize the current status.
+* So to summarize the current status.
 * defer is available in Apollo alphas
 * It's usable in Relay, but without a solution for the issue of distinguishing loading and null states
 * The Relay team is working on adding support
