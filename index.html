@@ -199,7 +199,7 @@ class: center, middle
 * Our front-end team is all-in on JavaScript. 
 * Our stack is Node, GraphQL, React, & Relay.
 * We have offices in New York and Vilnius.
-<!-- * Please get in touch with me if this sounds interesting to you! -->
+* and we're hiring so definitely get in touch with me if this sounds interesting to you!
 
 ---
 ## What are the best ways to load data into an application?
@@ -321,6 +321,7 @@ class: center, middle
 
 ???
 * Let's talk about GraphQL now. 
+* Show of hands, how many people are using GraphQL in production?
 * I'll give a brief overview in case you're not familiar
 * It's a language for querying data. 
 * It was developed by Facebook to build their mobile apps
@@ -360,7 +361,7 @@ class: center, middle
 <img src="app.png" style="width:80%" />
 ]
 .column.codeLine[
-`POST` `/api/graphql/`
+`POST` `/api/graphql`
 
 <br />
 
@@ -418,6 +419,13 @@ RESPONSE
 * If you squint at it, a GraphQL request kind of looks like JSON, with only the keys
 * The GraphQL server will process this request and return actual JSON in the same shape as the GraphQL request
 * Since there's only one request we don't have to write code to coordinate sending the waterfall of REST requests.
+
+---
+# GraphQL can wrap an existing API
+
+<img style="width: 100%; margin: 80px auto 0" src="graphql-wraps-rest.png" />
+
+???
 * It's pretty common to wrap a REST api with a GraphQL server. 
 * It's a mostly low cost way to start getting the benefits of using GraphQL in your client code without having to rewrite your whole backend from scratch.
 
@@ -566,7 +574,6 @@ fragment Comments on Talk {
 * Fragments are reusable portions of a GraphQL Query.
 * You can define a fragment and reuse it in multiple places in your query
 * You can think of it as a building block of a GraphQL query. 
-* It's kind of like how a React component is a building block of a React application 
 
 
 ---
@@ -673,7 +680,7 @@ Wait for first request to finish before second can begin
 * This is the most common approach to this issue.
 * You split your code up into multiple graphql queries and execute them as soon as you can 
 * The downsides are you need to write code to coordinate these requests, similar to what we did with our REST requests
-* Also note that we waited until both the schedule and speakers finished loading, instead of just the schedule, so it will be slower overall.
+* This will definitely speed up the schedule and the speakers, but now the comments are much slower, since it had to wait until both the schedule and speakers finished loading,
 * You could keep reworking this by splitting up your requests into even more graphql queries, but each time you do this you add more complexity to your code.
 
 
@@ -683,7 +690,7 @@ Wait for first request to finish before second can begin
 
 -   Experimental new GraphQL feature
 -   Gives clients a way to add boundaries to graphql requests
--   Server can send results that are ready while the others are still parsing
+-   Server can send results that are ready while the others are still loading
 -   Client can begin rendering as data is received
 
 ???
@@ -699,7 +706,7 @@ Wait for first request to finish before second can begin
 .flex[
 
 .column.codeLine[
-`POST` `/api/graphql/`
+`POST` `/api/graphql`
 
 <br />
 
@@ -776,17 +783,6 @@ Deferred Response
 * You'll need a graphql client that understand how to piece these together.
 
 ---
-
-<img style="display: block; width: 80%; margin:0 auto;" src="defer-curl.gif" />
-
-???
-
-* This is what it looks like when you make this request on the command line with curl.
-* You can see how each of the JSON objects are sent over the same connection.
-* They're sent as soon as the data is ready
-* and the connection is closed after the last one is sent.
-
----
 # Defer waterfall
 
 <img style="display: block; width: 100%; margin: -40px auto 0 auto;" src="defer-waterfall.png" />
@@ -820,7 +816,7 @@ Deferred Response
 
 # When to use `@defer`?
 
-1. Field is expensive to load..
+1. Field is expensive to load.
 2. Field is not on the critical path for interactivity.
 3. Field is expensive to send.
 
@@ -837,7 +833,7 @@ Deferred Response
 
 * No websockets!
 * HTTP connection stays open until all data is received.
-* Multipart response like file uploads and emails
+* Multipart response like file uploads
 * Requires a client that can stream data
   * loop over data until enough bytes are read
 
@@ -896,9 +892,20 @@ Content-Length: 140
 * After the initial data is sent, the connection will remain open until each patch is sent.
 
 ---
+
+<img style="display: block; width: 80%; margin:0 auto;" src="defer-curl.gif" />
+
+???
+
+* This is what it looks like when you make this request on the command line with curl.
+* You can see how each of the JSON objects are sent over the same connection.
+* They're sent as soon as the data is ready
+* and the connection is closed after the last one is sent.
+
+---
 # Standard GraphQL Network Layer
 
-Returns a promise with data
+GraphQL Request => Promise&amp;lt;JSON Response&gt;
 
 .bigCode[
 
@@ -929,7 +936,7 @@ Returns a promise with data
 
 Use Readable Streams api to read bytes as they are recieved.
 
-Returns a stream of response data. 
+GraphQL Request => Observable&amp;lt;JSON Response&gt;
 
 Similar to GraphQL Subscriptions
 
@@ -962,7 +969,7 @@ function fetchGraphQL({query, onNext, onComplete}) {
 
 ???
 
-* Now in this example we have updated the network layer to support streaming connections.
+* Now in this example we've updated the network layer to support streaming connections.
 * First thing, we changed the interface to act like an obversable instead of returning a Promise.
 * This function will call `onNext` each time we have a new fully constructed JSON object.
 * It will call onComplete after the network connection is closed, meaning all of the patches have been received.
@@ -1036,7 +1043,7 @@ function fetchGraphQLXHR({query, onNext, onComplete}) {
 
 ???
 
-* You probably don't want to right this stuff all by hand.
+* You probably don't want to write this stuff all by hand.
 * I also left out error handling to keep the examples clean.
 * The good news is that Apollo Client (which is one of the most popular graphql clients) includes this in an alpha version.
 * I also wrote an open source library called "fetch-multipart-graphql", if you want to use this without apollo.
@@ -1154,7 +1161,7 @@ Provides `loadingState` prop to distinguish between pending and `null`.
 * Relay currently doesn't support the @defer directive.
 * But it does support subscriptions and observables.
 * So we can use the network code I showed before, but we won't be able to solve the null or loading problem until proper support is added.
-* The Relay team is currently working on experimental support for the defer directive.
+* The Relay team is working on support for this.
 
 ---
 # Relay
@@ -1202,9 +1209,9 @@ function Talk({talk}) {
     <React.Fragment>
       <h1>{talk.title}</h1>
       <h3>Comments</h3>
-      <React.Suspense fallback={<div>loading...</div>}
-        <Comments talk={talk} />
-      </React.Suspense>
+*     <React.Suspense fallback={<div>loading...</div>}
+*       <Comments talk={talk} />
+*     </React.Suspense>
     </React.Fragment>
   )
 }
@@ -1213,7 +1220,7 @@ export default createFragmentContainer(Comments, {
   talk: graphql`
     fragment Talk on Talk {
       title
-      ...Comments @defer
+*     ...Comments @defer
     }
   `
 })
@@ -1235,7 +1242,7 @@ export default createFragmentContainer(Comments, {
 
 * Similar to @defer, but for lists
 * Will load each element of the list as it is ready
-* Get the first item in the list on the screen without waiting for the whole list
+* Show users the first item in the list without waiting for the whole list
 
 ???
 
@@ -1368,6 +1375,8 @@ query {
   * https://www.youtube.com/watch?v=ViXL0YQnioU
 * Apollo Blog - Introducing @defer in Apollo Server
   * https://blog.apollographql.com/introducing-defer-in-apollo-server-f6797c4e9d6e
+* These slides
+  * https://robrichard.net/jskongress-2019/
   
 ???
 
