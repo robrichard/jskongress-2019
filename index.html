@@ -181,14 +181,16 @@ class: center, middle
 
 ---
 
-<image style="width:100%" src="./1stdibs.png"/>
+<image style="width: 122%;margin: -1em -4em;" src="./1stdibs.png"/>
 
 ???
 * 1stdibs is an online marketplace for rare and desireable goods. We sell Furniture, Jewelry, Fashion, and Art.
 
 
 ---
-# 1stdibs
+<img src="./logo.svg" style="width:250px; display:block; margin: 0 auto" /> 
+
+<div style="font-size: 40px; padding-bottom: 40px; text-align: center; font-family: 'Miller Display Light'">Shop the world's most beautiful things</div>
 
 * Front-End stack: Node, GraphQL, React, & Relay
 
@@ -808,7 +810,7 @@ Deferred Response
 </small>
 
 ???
-* I thought this animation provided by Apollo is a good example of what using @defer looks like to the end user
+* This is a good example of what using @defer looks like to the end user
 * They're using multiple levels of @defer here, and data is incrementally rendered as its loaded
 * Compare it to the example without defer, where the whole page loads when exactly the last piece of data arrives.
 
@@ -1143,6 +1145,7 @@ Provides `loadingState` prop to distinguish between pending and `null`.
 
 * This is where a GraphQL client will come in handy.
 * As I mentioned before, Apollo Client has experimental support for the defer directive in an alpha release
+* These examples are React but this could work with any framework.
 * They will help you solve this problem by passing a loading state object of all the deferred fields that are currently loading.
 * You can use this object to ensure your loading states are handled correctly.
 
@@ -1332,12 +1335,11 @@ query {
 * And of course you can use both the defer directive and the stream directive in the same query
 
 ---
-# Current Status
+# Current Status - @defer
 
-* @defer
-  * Implemented in Apollo Server and Apollo Client alphas
-  * Currently usable in Relay, can't distinguish between loading and null states
-  * WIP by Relay team 
+* Implemented in Apollo Server and Apollo Client alphas
+* Currently usable in Relay, can't distinguish between loading and null states
+* WIP by Relay team 
 
 ???
 
@@ -1347,11 +1349,10 @@ query {
 * The Relay team is working on adding support
 
 ---
-# Current Status
+# Current Status - @stream
 
-* @stream
-  * More experimental
-  * Not supported in Relay or Apollo
+* More experimental
+* Not supported in Relay or Apollo
 
 ???
 
@@ -1371,7 +1372,7 @@ query {
 
 ---
 # More Info
-* Lee Byron - GraphQL Future at react-europe 2016
+* Lee Byron - GraphQL Future at React Europe 2016
   * https://www.youtube.com/watch?v=ViXL0YQnioU
 * Apollo Blog - Introducing @defer in Apollo Server
   * https://blog.apollographql.com/introducing-defer-in-apollo-server-f6797c4e9d6e
