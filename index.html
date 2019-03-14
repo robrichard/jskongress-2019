@@ -459,7 +459,7 @@ Trimmed down data is sent over slow, spotty internet
 * We're still making the same requests that the REST version of that app was making.
 * But it will be faster, because all of those round trips are happening over a fast datacenter connection. 
 * Maybe they are even on the same physical server
-* If those REST endpoints returned additional data that was not part of the GraphQL query, it will be trimmed down to the slim graphql response 
+* If those REST endpoints returned additional data that was not requested by the GraphQL query, it will be trimmed down to the slim graphql response 
 * A single small efficient payload is what gets sent over slow unreliable public internet.
 
 ---
@@ -510,7 +510,7 @@ query ($first: Int!) {
 ???
 
 * There's a few additional GraphQL features I want to talk about.
-* The first is that every field in GraphQL can be thought of as a function
+* The first is that every field in GraphQL is a function
 * Any field can take arguments
 * In this case I added a picture field on the speaker, which accepts a size argument
 * In your server implementation, you can write a function called a resolver to compute what the results of a field can be
@@ -683,7 +683,8 @@ Wait for first request to finish before second can begin
 * This is the most common approach to this issue.
 * You split your code up into multiple graphql queries and execute them as soon as you can 
 * The downsides are you need to write code to coordinate these requests, similar to what we did with our REST requests
-* This will definitely speed up the schedule and the speakers, but now the comments are much slower, since it had to wait until both the schedule and speakers finished loading,
+* This will definitely speed up the schedule and the speakers, but now the comments are much slower.
+* We had to wait until both the schedule and speakers finished loading before we could even start requesting the comments.
 * You could keep reworking this by splitting up your requests into even more graphql queries, but each time you do this you add more complexity to your code.
 
 
